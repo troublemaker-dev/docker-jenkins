@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 @Library('github.com/jenkins-infra/pipeline-library@master') _
 buildDockerAndPublishImage(
-    'troublemaker/jenkins',
+    'controller',
     [
         agentLabels: '',
         credentials: 'dockerhub-troublemaker',
