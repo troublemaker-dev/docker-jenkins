@@ -1,3 +1,11 @@
-#!/usr/bin/groovy
-@Library('github.com/troublemaker-dev/jenkins-shared-library@troublemaker') _
-buildDockerfile('troublemaker/jenkins', [skipPull: true, noCache: true])
+#!/usr/bin/env groovy
+@Library('github.com/jenkins-infra/pipeline-library@master') _
+buildDockerAndPublishImage(
+    'troublemaker/jenkins',
+    [
+        agentLabels: '',
+        credentials: 'dockerhub-troublemaker',
+        platform: 'linux/arm64',
+        useContainer: true
+    ]
+)
