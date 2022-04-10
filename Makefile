@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
 
 NAME = jenkins
-TAGNAME = troublemaker-dev/$(NAME)
+TAGNAME = ghcr.io/troublemaker-dev/$(NAME)
 VERSION = $(shell git log -n 1 --pretty=format:'%h')
 
 build: ## Build docker image
