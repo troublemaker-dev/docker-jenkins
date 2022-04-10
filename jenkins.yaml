@@ -1,114 +1,311 @@
-security:
-  queueItemAuthenticator:
-    authenticators:
-      - global:
-          strategy: "triggeringUsersAuthorizationStrategy"
 jenkins:
-  remotingSecurity:
-    enabled: true
-  disableRememberMe: false
   agentProtocols:
-    - "JNLP4-connect"
-    - "Ping"
-  markupFormatter: "markdownFormatter"
-  numExecutors: 0
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
   clouds:
-    - kubernetes:
-        containerCapStr: "3"
-        jenkinsTunnel: "jenkins-agent:50000"
-        jenkinsUrl: "http://jenkins:8080"
-        maxRequestsPerHostStr: "32"
-        name: "kubernetes"
-        namespace: "jenkins"
-        podLabels:
-        - key: "jenkins/jenkins-jenkins-slave"
-          value: "true"
-        serverUrl: "https://kubernetes.default"
-        templates:
-        - containers:
-          - alwaysPullImage: true
-            args: "^${computer.jnlpmac} ^${computer.name}"
-            envVars:
-            - envVar:
-                key: "JENKINS_URL"
-                value: "http://jenkins.jenkins.svc.cluster.local:8080"
-            image: "jenkins/jnlp-agent-docker"
-            runAsGroup: "998"
-            runAsUser: "1000"
-            livenessProbe:
-              failureThreshold: 0
-              initialDelaySeconds: 0
-              periodSeconds: 0
-              successThreshold: 0
-              timeoutSeconds: 0
-            name: "jnlp"
-            privileged: true
-            resourceLimitCpu: "2.0"
-            resourceLimitMemory: "2048Mi"
-            resourceRequestCpu: "1.0"
-            resourceRequestMemory: "1024Mi"
-            ttyEnabled: false
-            workingDir: "/home/jenkins/agent"
-          hostNetwork: false
-          idleMinutes: 30
-          idleMinutesStr: "30"
-          label: "jenkins-agent"
-          name: "default"
-          namespace: "jenkins"
-          nodeUsageMode: "NORMAL"
-          podRetention: "onFailure"
-          serviceAccount: "default"
-          workspaceVolume:
-            emptyDirWorkspaceVolume:
-              memory: true
-          volumes:
-           - hostPathVolume:
-               hostPath: "/var/run/docker.sock"
-               mountPath: "/var/run/docker.sock"
-          yaml: |
-            spec:
-              dnsConfig:
-                options:
-                  - name: ndots
-                    value: "1"
-          yamlMergeStrategy: "override"
+  - kubernetes:
+      containerCap: 10
+      containerCapStr: "10"
+      jenkinsTunnel: "jenkins-agent.jenkins.svc.cluster.local:50000"
+      jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+      name: "kubernetes"
+      namespace: "jenkins"
+      podLabels:
+      - key: "jenkins/jenkins-jenkins-agent"
+        value: "true"
+      serverUrl: "https://kubernetes.default"
+      templates:
+      - containers:
+        - args: "^${computer.jnlpmac} ^${computer.name}"
+          envVars:
+          - envVar:
+              key: "JENKINS_URL"
+              value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+          image: "jenkins/inbound-agent:4.11-1"
+          name: "jnlp"
+          resourceLimitCpu: "512m"
+          resourceLimitMemory: "512Mi"
+          resourceRequestCpu: "512m"
+          resourceRequestMemory: "512Mi"
+          workingDir: "/home/jenkins/agent"
+        label: "jenkins-jenkins-agent"
+        name: "default"
+        nodeUsageMode: NORMAL
+        podRetention: "never"
+        serviceAccount: "default"
+        slaveConnectTimeout: 100
+        slaveConnectTimeoutStr: "100"
+        yamlMergeStrategy: "override"
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: true
+  disableRememberMe: false
+  labelAtoms:
+  - name: "built-in"
+  - name: "jenkins-jenkins-agent"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 0
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: "admin"
+        name: "Jenkins Admin"
+        properties:
+        - "apiToken"
+        - "theme"
+        - "mailer"
+        - "favorite"
+        - "myView"
+        - preferredProvider:
+            providerId: "default"
+        - "timezone"
+      - id: "krachynski"
+        name: "Ken Rachynski"
+        properties:
+        - "apiToken"
+        - "theme"
+        - "favorite"
+        - "myView"
+        - preferredProvider:
+            providerId: "default"
+        - "timezone"
+        - mailer:
+            emailAddress: "chief@troublemaker.dev"
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+  sSHD:
+    port: -1
 unclassified:
-  location:
-    adminAddress: "jenkins@troublemaker.dev"
-    url: "https://jenkins.debian.troublemaker.dev/"
-  email-ext:
-    defaultReplyTo: "jenkins@troublemaker.dev"
-    mailAccount:
-      smtpPort: "25"
-      smtpHost: "${SMTP_SERVER}"
-  mailer:
-    replyToAddress: "jenkins@troublemaker.dev"
-    smtpHost: "${SMTP_SERVER}"
-    smtpPort: "25"
+  ansiColorBuildWrapper:
+    colorMaps:
+    - black: "#000000"
+      blackB: "#4C4C4C"
+      blue: "#1E90FF"
+      blueB: "#4682B4"
+      cyan: "#00CDCD"
+      cyanB: "#00FFFF"
+      green: "#00CD00"
+      greenB: "#00FF00"
+      magenta: "#CD00CD"
+      magentaB: "#FF00FF"
+      name: "xterm"
+      red: "#CD0000"
+      redB: "#FF0000"
+      white: "#E5E5E5"
+      whiteB: "#FFFFFF"
+      yellow: "#CDCD00"
+      yellowB: "#FFFF00"
+    - black: "#000000"
+      blackB: "#555555"
+      blue: "#0000AA"
+      blueB: "#5555FF"
+      cyan: "#00AAAA"
+      cyanB: "#55FFFF"
+      defaultBackground: 0
+      defaultForeground: 7
+      green: "#00AA00"
+      greenB: "#55FF55"
+      magenta: "#AA00AA"
+      magentaB: "#FF55FF"
+      name: "vga"
+      red: "#AA0000"
+      redB: "#FF5555"
+      white: "#AAAAAA"
+      whiteB: "#FFFFFF"
+      yellow: "#AA5500"
+      yellowB: "#FFFF55"
+    - black: "black"
+      blackB: "black"
+      blue: "blue"
+      blueB: "blue"
+      cyan: "cyan"
+      cyanB: "cyan"
+      green: "green"
+      greenB: "green"
+      magenta: "magenta"
+      magentaB: "magenta"
+      name: "css"
+      red: "red"
+      redB: "red"
+      white: "white"
+      whiteB: "white"
+      yellow: "yellow"
+      yellowB: "yellow"
+    - black: "#2E3436"
+      blackB: "#2E3436"
+      blue: "#3465A4"
+      blueB: "#3465A4"
+      cyan: "#06989A"
+      cyanB: "#06989A"
+      defaultBackground: 0
+      defaultForeground: 7
+      green: "#4E9A06"
+      greenB: "#4E9A06"
+      magenta: "#75507B"
+      magentaB: "#75507B"
+      name: "gnome-terminal"
+      red: "#CC0000"
+      redB: "#CC0000"
+      white: "#D3D7CF"
+      whiteB: "#D3D7CF"
+      yellow: "#C4A000"
+      yellowB: "#C4A000"
+  badgePlugin:
+    disableFormatHTML: false
   buildDiscarders:
     configuredBuildDiscarders:
-      - "jobBuildDiscarder"
-      - simpleBuildDiscarder:
-          discarder:
-            logRotator:
-              numToKeepStr: "5"
-  themeManager:
-    disableUserThemes: false
-    theme: "darkSystem"
-  globalDefaultFlowDurabilityLevel:
-    durabilityHint: PERFORMANCE_OPTIMIZED
+    - "jobBuildDiscarder"
+  buildStatusConfig:
+    dbVersion: 2
+    enableGithub: true
+    enableHttp: false
+    enableInfluxDb: false
+    enableStatsd: false
+    httpVerifySSL: false
+    ignoreSendingTestCoverageToInflux: false
+    ignoreSendingTestResultsToInflux: true
+    statsdMaxSize: "1400"
+    statsdPort: "8125"
+  email-ext:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultTriggerIds:
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    mailAccount:
+      credentialsId: "apple-mail-troublemaker"
+      smtpHost: "smtp.mail.me.com"
+      smtpPort: "587"
+      useTls: true
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    watchingEnabled: false
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "https://jenkins.lab.troublemaker.dev/github-webhook/"
+  gitSCM:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    globalConfigEmail: "jenkins@troublemaker.dev"
+    globalConfigName: "Jenkins"
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: true
+  globalConfigurationImpl:
+    allResults: true
+    enabled: true
+    enabledFavorites: true
+    notificationTimeout: 15000
   globalLibraries:
     libraries:
-      - name: "github.com/troublemaker-dev/jenkins-shared-library"
-        implicit: true
-        defaultVersion: "master"
-        retriever:
-          modernSCM:
-            scm:
-              git:
-                credentialsId: "github-app"
-                id: "030c8d61-1539-42f5-b2b4-4b217a0eed5f"
-                remote: "https://github.com/halkeye/jenkins-shared-library"
+    - defaultVersion: "troublemaker"
+      name: "github.com/troublemaker-dev/jenkins-shared-library"
+      retriever:
+        modernSCM:
+          scm:
+            git:
+              credentialsId: "github-troublemaker"
+              id: "d9d6e68d-a937-4449-8669-7d1558f91d80"
+              remote: "https://github.com/troublemaker-dev/jenkins-shared-library.git"
+              traits:
+              - "gitBranchDiscovery"
+    - defaultVersion: "master"
+      name: "github.com/jenkins-infra/pipeline-library"
+      retriever:
+        modernSCM:
+          scm:
+            git:
+              credentialsId: "github-troublemaker"
+              id: "19505c0c-eb64-4577-9124-27b06374c7fa"
+              remote: "https://github.com/jenkins-infra/pipeline-library.git"
+              traits:
+              - "gitBranchDiscovery"
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "Jenkins <jenkins@troublemaker.dev>"
+    url: "https://jenkins.lab.troublemaker.dev/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  pollSCM:
+    pollingThreadCount: 10
+  prismConfiguration:
+    theme: PRISM
+  prometheusConfiguration:
+    appendParamLabel: false
+    appendStatusLabel: false
+    collectDiskUsage: true
+    collectingMetricsPeriodInSeconds: 120
+    countAbortedBuilds: true
+    countFailedBuilds: true
+    countNotBuiltBuilds: true
+    countSuccessfulBuilds: true
+    countUnstableBuilds: true
+    defaultNamespace: "default"
+    fetchTestResults: true
+    jobAttributeName: "jenkins_job"
+    path: "prometheus"
+    processingDisabledBuilds: false
+    useAuthenticatedEndpoint: false
+  themeManager:
+    disableUserThemes: false
+  warningsParsers:
+    consoleLogScanningPermitted: false
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
